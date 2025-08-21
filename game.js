@@ -91,7 +91,7 @@ class Scene1 extends Phaser.Scene {
         button.on('pointerdown', () => {  // when pointer is clicked
             //console.log('Button clicked!');
             this.scene.stop('Scene1');
-            this.scene.start('Scene2');
+            this.scene.start('SceneMid');
         })
         button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
         button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
@@ -135,6 +135,32 @@ class Scene1 extends Phaser.Scene {
 
 }
 
+class SceneMid extends Phaser.Scene {
+    // Intro scene (Just the title screen)
+    constructor(){
+        super({key:'SceneMid'});
+    }
+
+    create(){
+        this.add.text(10,150, 'Cue flowers being sorted \n and dried :)', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
+
+        const button = this.add.text(200,400,'->', {
+            fontSize: '32px',
+            fill: '#fff',
+            backgroundColor: '#000',
+            padding: {x:10, y:5}
+        });
+        button.setInteractive({useHandCursor:true}); // gives the button the ability to give code to it :)
+        button.on('pointerdown', () => {  // when pointer is clicked
+            //console.log('Button clicked!');
+            this.scene.stop('SceneMid');
+            this.scene.start('Scene3');
+        })
+        button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
+        button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
+    }
+}
+
 class Scene2 extends Phaser.Scene {
     // Intro scene (Just the title screen)
     constructor(){
@@ -144,6 +170,80 @@ class Scene2 extends Phaser.Scene {
     create(){
         this.add.text(10,150, 'SCENE 2: TEA', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
     }
+}
+
+class Scene3 extends Phaser.Scene {
+    // Intro scene (Just the title screen)
+    constructor(){
+        super({key:'Scene3'});
+    }
+
+    preload(){
+        this.load.image('orderForm', 'sprites/cakeOrder.png');
+    }
+
+    create(){
+        this.add.text(10,150, 'SCENE : TEA', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
+        this.add.image(0,0,'orderForm').setOrigin(0,0);
+
+        const button = this.add.text(430,350,'->', {
+            fontSize: '32px',
+            fill: '#fff',
+            backgroundColor: '#000',
+            padding: {x:10, y:5}
+        });
+        button.setInteractive({useHandCursor:true}); // gives the button the ability to give code to it :)
+        button.setVisible(false);
+        button.on('pointerdown', () => {  // when pointer is clicked
+            //console.log('Button clicked!');
+            this.scene.stop('Scene3');
+            this.scene.start('SceneMid');
+        })
+        button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
+        button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
+
+        // pink, orange, green, blue, purple
+        this.selectedButton = null;  // track the currently selected one
+        this.buttons = [];           // store all button references
+
+        const colors = ["#ff00ff","#ff9900ff" , "#00ff00", "#0000ff", "#bf00ffff"];
+        const labels = ["Pink", "Orange", "Green", "Blue", "Purple"];
+
+        for (let i = 0; i < 5; i++) {
+            let btn = this.add.text(125 + i * 55, 380, "   ", {
+                fontSize: "10px",
+                fill: "#fff",
+                backgroundColor: colors[i]   // normal color
+            })
+            .setPadding(10)
+            .setInteractive();
+
+            btn.baseColor = colors[i];  // save original color
+            btn.color = labels[i];
+
+            btn.on("pointerdown", () => {
+                this.selectButton(btn);
+                gameState.frostingColor = btn.color;
+                button.setVisible(true);
+                
+            });
+
+            this.buttons.push(btn);
+        }
+    }
+
+    // function to select one button
+    selectButton(btn) {
+        // reset all buttons
+        this.buttons.forEach(b => {
+            b.setStyle({stroke: '#000000', strokeThickness: 0});
+        });
+
+        // highlight only the clicked one
+        btn.setStyle({stroke: '#448cafff', strokeThickness: 8});  // highlight style
+        this.selectedButton = btn;
+    }
+
 }
 
 // Helper function: Gets random int, inclusive of min and max
@@ -158,7 +258,8 @@ const flowerList = ['blackLeaf', 'butterflyPea', 'carnation', 'chamomile',
     'jasmine', 'lavender', 'mallow', 'marigold', 'mint', 'rose', 'violet', 'whiteLeaf'];
 
 const gameState = {
-    flowerSet: new Set() // store collected flowers from scene1
+    flowerSet: new Set(), // store collected flowers from scene1
+    frostingColor: ""
 }
 
 const config = {
@@ -167,7 +268,7 @@ const config = {
     height: 512,
     pixelArt: true, // keeps pixelart from getting blurry
     backgroundColor: 0xE0B0FF,
-    //scene: [StartScene, Scene1, Scene2]
+    //scene: [StartScene, Scene1, SceneMid, Scene3]
     scene: Scene2
 };
 
