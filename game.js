@@ -490,7 +490,7 @@ class Scene4 extends Phaser.Scene {
 
         // Water Heating
         this.load.image('heater', 'sprites/teaHeater.png');
-        this.load.image('fire', 'sprites/teaFire.png');
+        this.load.image('fire', 'sprites/teafire.png');
         this.load.image('teapot', 'sprites/teapot.png');
 
         // Cups
@@ -640,6 +640,7 @@ function getRandomIntInclusive(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Helper function: Sorts flowers based on how many of each color they got to decide which blend to use
 function sortFlowers(){
     const currFlowers = Array.from(gameState.flowerSet);
     console.log(currFlowers);
