@@ -53,6 +53,9 @@ class Scene1 extends Phaser.Scene {
     }
 
     create(){
+        // for new game clear the set of flowers: 
+        gameState.flowerSet = new Set();
+
         this.add.image(0,0,'field').setOrigin(0,0);  // field background
         //this.add.text(10,150, 'SCENE 1: PLANTS', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
 
@@ -226,7 +229,7 @@ class Scene2 extends Phaser.Scene {
 
         // All jars (up to 16) - replace with your own logic
         this.jars = [];
-        const currFlowers = Array.from(gameState.flowerSet)
+        const currFlowers = Array.from(gameState.flowerSet);
         for (let i = 0; i < currFlowers.length; i++) {  // CHANGE BACK TO currFlowers.length
             let jarStr = currFlowers[i] + "_jar"; 
             let teaStr = currFlowers[i] + "_crushed"; 
@@ -331,10 +334,6 @@ class Scene2 extends Phaser.Scene {
                     .setScale(3)
                     .setAlpha(0.8)
                     .setInteractive({ draggable: true });
-
-                // this.input.setDraggable(this.draggedTea);
-                // this.input.emit('dragstart', pointer, this.draggedTea);
-               
             });
 
         });
@@ -352,7 +351,6 @@ class Scene3 extends Phaser.Scene {
     }
 
     create(){
-        this.add.text(10,150, 'SCENE : TEA', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
         this.add.image(0,0,'orderForm').setOrigin(0,0);
 
         const button = this.add.text(430,350,'->', {
@@ -366,7 +364,7 @@ class Scene3 extends Phaser.Scene {
         button.on('pointerdown', () => {  // when pointer is clicked
             //console.log('Button clicked!');
             this.scene.stop('Scene3');
-            this.scene.start('SceneMid');
+            this.scene.start('SceneCup');
         })
         button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
         button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
@@ -376,7 +374,7 @@ class Scene3 extends Phaser.Scene {
         this.buttons = [];           // store all button references
 
         const colors = ["#ff00ff","#ff9900ff" , "#00ff00", "#0000ff", "#bf00ffff"];
-        const labels = ["Pink", "Orange", "Green", "Blue", "Purple"];
+        const labels = ["pink", "orange", "green", "blue", "purple"];
 
         for (let i = 0; i < 5; i++) {
             let btn = this.add.text(125 + i * 55, 380, "   ", {
@@ -415,11 +413,263 @@ class Scene3 extends Phaser.Scene {
 
 }
 
+class SceneCup extends Phaser.Scene {
+    constructor(){
+        super({key:'SceneCup'});
+    }
+
+    preload(){
+        this.load.image('shelf', 'sprites/cupShelf.png');
+
+        this.load.image('copperCup', 'sprites/copperCup.png');
+        this.load.image('dripCup', 'sprites/dripCup.png');
+        this.load.image('fancyCup', 'sprites/fancyGoldCup.png');
+        this.load.image('frogCup', 'sprites/frogCup.png');
+    }
+
+    create(){
+        this.add.image(0,0,'shelf').setOrigin(0,0);
+        this.add.text(40,450, 'Pick a cup for your tea!', {color: '#fff', fontSize:'30px'}).setOrigin(0,0);
+
+        // COPPER CUP
+        let copper = this.add.image(130, 165, 'copperCup').setScale(5).setInteractive({ useHandCursor: true });
+        // Pointer events
+        copper.on('pointerdown', () => {
+            gameState.chosenCup = "copperCup";
+            this.scene.stop('SceneCup');
+            this.scene.start('Scene4');
+        });
+        copper.on('pointerover', () => {copper.setTint(0xaaaaaa); });  //hover effect
+        copper.on('pointerout', () => {copper.clearTint(); });  // remove hover effect
+
+        // FROG CUP
+        let frog = this.add.image(380, 165, 'frogCup').setScale(5).setInteractive({ useHandCursor: true });
+        // Pointer events
+        frog.on('pointerdown', () => {
+            gameState.chosenCup = "frogCup";
+            this.scene.stop('SceneCup');
+            this.scene.start('Scene4');
+        });
+        frog.on('pointerover', () => {frog.setTint(0xaaaaaa); });  //hover effect
+        frog.on('pointerout', () => {frog.clearTint(); });  // remove hover effect
+
+        // FANCY CUP
+        let fancy = this.add.image(140, 365, 'fancyCup').setScale(4.5).setInteractive({ useHandCursor: true });
+        // Pointer events
+        fancy.on('pointerdown', () => {
+            gameState.chosenCup = "fancyCup";
+            this.scene.stop('SceneCup');
+            this.scene.start('Scene4');
+        });
+        fancy.on('pointerover', () => {fancy.setTint(0xaaaaaa); });  //hover effect
+        fancy.on('pointerout', () => {fancy.clearTint(); });  // remove hover effect
+
+        // DRIP CUP
+        let drip = this.add.image(380, 365, 'dripCup').setScale(5).setInteractive({ useHandCursor: true });
+        // Pointer events
+        drip.on('pointerdown', () => {
+            gameState.chosenCup = "dripCup";
+            this.scene.stop('SceneCup');
+            this.scene.start('Scene4');
+        });
+        drip.on('pointerover', () => {drip.setTint(0xaaaaaa); });  //hover effect
+        drip.on('pointerout', () => {drip.clearTint(); });  // remove hover effect
+
+    }
+}
+
+class Scene4 extends Phaser.Scene {
+    // Intro scene (Just the title screen)
+    constructor(){
+        super({key:'Scene4'});
+    }
+
+    preload(){
+        // Table Background
+        this.load.image('table', 'sprites/tableTexture.png');
+
+        // Water Heating
+        this.load.image('heater', 'sprites/teaHeater.png');
+        this.load.image('fire', 'sprites/teaFire.png');
+        this.load.image('teapot', 'sprites/teapot.png');
+
+        // Cups
+        this.load.image('copperCup', 'sprites/copperCup.png');
+        this.load.image('dripCup', 'sprites/dripCup.png');
+        this.load.image('fancyCup', 'sprites/fancyGoldCup.png');
+        this.load.image('frogCup', 'sprites/frogCup.png');
+
+        // Blends
+        this.load.image('greenBlend', 'sprites/greenBlend.png');
+        this.load.image('greenJar', 'sprites/greenBlend_jar.png');
+
+        this.load.image('pinkBlend', 'sprites/pinkBlend.png');
+        this.load.image('pinkJar', 'sprites/pinkBlend_jar.png');
+
+        this.load.image('purpleBlend', 'sprites/purpleBlend.png');
+        this.load.image('purpleJar', 'sprites/purpleBlend_jar.png');
+
+        this.load.image('whiteBlend', 'sprites/whiteBlend.png');
+        this.load.image('whiteJar', 'sprites/whiteBlend_jar.png');
+    }
+
+    create(){
+        this.add.image(0,0,'table').setOrigin(0,0);
+        const blendColor = sortFlowers(); //sortFlowers();
+        this.add.image(250,380, gameState.chosenCup).setScale(5.5);  //gameState.chosenCup
+        
+
+
+        // Teapot Interactions
+        let teapot = this.add.image(350, 100, 'teapot').setScale(6.5).setInteractive({ draggable: true });
+        let originalX = teapot.x;
+        let originalY = teapot.y;
+
+        this.input.setDraggable(teapot);
+        teapot.on('drag', (pointer, dragX, dragY) => {
+            teapot.x = dragX;
+            teapot.y = dragY;
+        });
+
+        teapot.on('dragend', () => {
+            teapot.x = originalX;
+            teapot.y = originalY;
+        });
+
+        // Heater Interactions
+        let heater = this.add.image(350, 230, 'heater').setScale(6.5).setInteractive({ useHandCursor: true });
+        let fire = this.add.image(345,232, 'fire').setScale(6.5).setVisible(false);
+
+        // Pointer events
+        heater.on('pointerdown', () => {
+            fire.setVisible(!fire.visible);
+        });
+        heater.on('pointerover', () => {heater.setTint(0xaaaaaa); });  //hover effect
+        heater.on('pointerout', () => {heater.clearTint(); });  // remove hover effect
+
+
+        // Tea Jar Interactions
+        let blendJar = this.add.image(100,100, blendColor+"Jar").setScale(8).setInteractive({ useHandCursor: true });
+
+        // When clicking the jar, spawn a draggable tea image
+        blendJar.on('pointerdown', (pointer) => {
+            this.draggedTea = this.add.image(pointer.x, pointer.y, blendColor+"Blend") // use correct tea key
+                .setScale(3)
+                .setAlpha(0.8)
+                .setInteractive({ draggable: true });
+        });
+
+        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+                gameObject.x = dragX;
+                gameObject.y = dragY;
+        });
+
+
+        // BUTTON
+        const button = this.add.text(420,450,'->', {
+            fontSize: '35px',
+            fill: '#fff',
+            backgroundColor: '#000',
+            padding: {x:10, y:5}
+        });
+        button.setInteractive({useHandCursor:true}); // gives the button the ability to give code to it :)
+        button.on('pointerdown', () => {  // when pointer is clicked
+            //console.log('Button clicked!');
+            this.scene.stop('Scene4');
+            this.scene.start('Scene5');
+        })
+        button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
+        button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
+    }
+}
+
+class Scene5 extends Phaser.Scene {
+    constructor(){
+        super({key:'Scene5'});
+    }
+
+    preload(){
+        //background
+        this.load.image('teaScene', 'sprites/teaPartyScene.png');
+
+        // Cups
+        this.load.image('copperCup', 'sprites/copperCup.png');
+        this.load.image('dripCup', 'sprites/dripCup.png');
+        this.load.image('fancyCup', 'sprites/fancyGoldCup.png');
+        this.load.image('frogCup', 'sprites/frogCup.png');
+
+        // Cake
+        this.load.image('base', 'sprites/blankCake.png');
+        this.load.image('blue', 'sprites/blueFrosting.png');
+        this.load.image('green', 'sprites/greenFrosting.png');
+        this.load.image('orange', 'sprites/orangeFrosting.png');
+        this.load.image('pink', 'sprites/pinkFrosting.png');
+        this.load.image('purple', 'sprites/purpleFrosting.png');
+    }
+
+    create(){
+        this.add.image(0,0, 'teaScene').setOrigin(0,0);
+
+        this.add.image(265,380, 'base').setScale(5);
+        this.add.image(265,325, gameState.frostingColor).setScale(5);  // change to gameState.frostingColor
+
+        this.add.image(180, 460, gameState.chosenCup).setScale(3); // change to gameState.chosenCup
+
+
+        const button = this.add.text(350,470,'Play Again', {
+            fontSize: '20px',
+            fill: '#fff',
+            backgroundColor: '#000',
+            padding: {x:10, y:5}
+        });
+        button.setInteractive({useHandCursor:true}); // gives the button the ability to give code to it :)
+        button.on('pointerdown', () => {  // when pointer is clicked
+            //console.log('Button clicked!');
+            this.scene.stop('Scene5');
+            this.scene.start('Scene1');
+        })
+        button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
+        button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
+    }
+}
+
 // Helper function: Gets random int, inclusive of min and max
 function getRandomIntInclusive(min, max) {
   min = Math.ceil(min);
   max = Math.floor(max);
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function sortFlowers(){
+    const currFlowers = Array.from(gameState.flowerSet);
+    console.log(currFlowers);
+    let purple=0, pink=0, white=0, green = 0;
+    for(let i = 0; i < currFlowers.length; i++){
+        console.log(currFlowers[i]);
+        if(currFlowers[i] === "lavender" || currFlowers[i] === "violet" 
+            || currFlowers[i] === "cornflower" || currFlowers[i] === "butterflyPea" || currFlowers[i] === "mallow"){
+            purple++;
+        }
+        if(currFlowers[i] === "jasmine"|| currFlowers[i] ==="chamomile"|| currFlowers[i] ==="whiteLeaf"){
+            white++;
+        }
+        if(currFlowers[i] === "rose"|| currFlowers[i] ==="marigold"|| currFlowers[i] ==="chrysanthemum"||
+            currFlowers[i] ==="blackLeaf"|| currFlowers[i] ==="carnation"|| currFlowers[i] ==="hibiscus"
+        ){
+            pink++;
+        }
+        if(currFlowers[i] ==="mint"|| currFlowers[i] ==="greenLeaf"){
+            green++;
+        }
+    }
+
+    const blend = Math.max(purple, pink, white, green);
+
+    if(blend === purple){ return "purple";}
+    else if(blend === pink){ return "pink";}
+    else if(blend === white){ return "white";}
+    else { return "green"};
+
 }
 
 const flowerList = ['blackLeaf', 'butterflyPea', 'carnation', 'chamomile', 
@@ -428,7 +678,8 @@ const flowerList = ['blackLeaf', 'butterflyPea', 'carnation', 'chamomile',
 
 const gameState = {
     flowerSet: new Set(), // store collected flowers from scene1
-    frostingColor: ""
+    frostingColor: "",
+    chosenCup: ""
 }
 
 const config = {
@@ -437,8 +688,8 @@ const config = {
     height: 512,
     pixelArt: true, // keeps pixelart from getting blurry
     backgroundColor: 0xE0B0FF,
-    scene: [StartScene, Scene1, SceneMid, Scene2, Scene3]
-    //scene: Scene2
+    scene: [StartScene, Scene1, SceneMid, Scene2, Scene3, SceneCup, Scene4, Scene5]
+    //scene: Scene4
 };
 
 const game = new Phaser.Game(config);
