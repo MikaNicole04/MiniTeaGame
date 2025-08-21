@@ -154,7 +154,7 @@ class SceneMid extends Phaser.Scene {
         button.on('pointerdown', () => {  // when pointer is clicked
             //console.log('Button clicked!');
             this.scene.stop('SceneMid');
-            this.scene.start('Scene3');
+            this.scene.start('Scene2');
         })
         button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
         button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
@@ -167,8 +167,115 @@ class Scene2 extends Phaser.Scene {
         super({key:'Scene2'});
     }
 
+    preload(){
+        // background table
+        this.load.image('table', 'sprites/tableTexture.png');
+
+        // jar sprites
+        this.load.image('blackLeaf_jar', 'sprites/flower_jar/blackLeaf_jar.png');
+        this.load.image('butterflyPea_jar', 'sprites/flower_jar/butterflyPea_jar.png');
+        this.load.image('carnation_jar', 'sprites/flower_jar/carnation_jar.png');
+        this.load.image('chamomile_jar', 'sprites/flower_jar/chamomile_jar.png');
+        this.load.image('chrysanthemum_jar', 'sprites/flower_jar/chrysanthemum_jar.png');
+        this.load.image('cornflower_jar', 'sprites/flower_jar/cornflower_jar.png');
+        this.load.image('greenLeaf_jar', 'sprites/flower_jar/greenLeaf_jar.png');
+        this.load.image('hibiscus_jar', 'sprites/flower_jar/hibiscus_jar.png');
+        this.load.image('jasmine_jar', 'sprites/flower_jar/jasmine_jar.png');
+        this.load.image('lavender_jar', 'sprites/flower_jar/lavender_jar.png');
+        this.load.image('mallow_jar', 'sprites/flower_jar/mallow_jar.png');
+        this.load.image('marigold_jar', 'sprites/flower_jar/marigold_jar.png');
+        this.load.image('mint_jar', 'sprites/flower_jar/mint_jar.png');
+        this.load.image('rose_jar', 'sprites/flower_jar/rose_jar.png');
+        this.load.image('violet_jar', 'sprites/flower_jar/violet_jar.png');
+        this.load.image('whiteLeaf_jar', 'sprites/flower_jar/whiteLeaf_jar.png');
+
+        // crushed flower sprites
+        this.load.image('blackLeaf_crushed', 'sprites/flowers_crushed/blackLeaf_crushed.png');
+        this.load.image('butterflyPea_crushed', 'sprites/flowers_crushed/butterflyPea_crushed.png');
+        this.load.image('carnation_crushed', 'sprites/flowers_crushed/carnation_crushed.png');
+        this.load.image('chamomile_crushed', 'sprites/flowers_crushed/chamomile_crushed.png');
+        this.load.image('chrysanthemum_crushed', 'sprites/flowers_crushed/chrysanthemum_crushed.png');
+        this.load.image('cornflower_crushed', 'sprites/flowers_crushed/cornflower_crushed.png');
+        this.load.image('greenLeaf_crushed', 'sprites/flowers_crushed/greenLeaf_crushed.png');
+        this.load.image('hibiscus_crushed', 'sprites/flowers_crushed/hibiscus_crushed.png');
+        this.load.image('jasmine_crushed', 'sprites/flowers_crushed/jasmine_crushed.png');
+        this.load.image('lavender_crushed', 'sprites/flowers_crushed/lavender_crushed.png');
+        this.load.image('mallow_crushed', 'sprites/flowers_crushed/mallow_crushed.png');
+        this.load.image('marigold_crushed', 'sprites/flowers_crushed/marigold_crushed.png');
+        this.load.image('mint_crushed', 'sprites/flowers_crushed/mint_crushed.png');
+        this.load.image('rose_crushed', 'sprites/flowers_crushed/rose_crushed.png');
+        this.load.image('violet_crushed', 'sprites/flowers_crushed/violet_crushed.png');
+        this.load.image('whiteLeaf_crushed', 'sprites/flowers_crushed/whiteLeaf_crushed.png');
+
+    }
+
     create(){
-        this.add.text(10,150, 'SCENE 2: TEA', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
+        //this.add.text(10,150, 'SCENE 2: TEA', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
+        this.add.image(0,0,"table").setOrigin(0,0);
+        this.add.rectangle(0,0, 180, 512, "0x00000", 0.7).setOrigin(0,0);
+
+
+         // All jars (up to 16) - replace with your own logic
+        this.jars = [];
+        const currFlowers = Array.from(gameState.flowerSet)
+        for (let i = 0; i < currFlowers.length; i++) {   // make 16 the size of the set eventuallly
+            let str = currFlowers[i] + "_jar"; 
+            this.jars.push({ key: str });
+        }
+
+        this.currentPage = 0;   // start at page 0
+        this.jarsPerPage = 4;   // how many jars to show at once
+
+        // Draw first page
+        this.showPage(this.currentPage);
+
+        // Arrow buttons
+        this.nextBtn = this.add.text(100, 480, "↓", { fontSize: "32px", fill: "#fff" })
+            .setInteractive()
+            .on("pointerdown", () => {
+                if ((this.currentPage + 1) * this.jarsPerPage < this.jars.length) {
+                    this.currentPage++;
+                    this.showPage(this.currentPage);
+                }
+            });
+
+        this.prevBtn = this.add.text(50, 480, "↑", { fontSize: "32px", fill: "#fff" })
+            .setInteractive()
+            .on("pointerdown", () => {
+                if (this.currentPage > 0) {
+                    this.currentPage--;
+                    this.showPage(this.currentPage);
+                }
+            });
+    }
+
+    showPage(page) {
+        // Remove old jars
+        if (this.displayedJars) {
+            this.displayedJars.forEach(j => j.destroy());
+            this.displayedText.forEach(j => j.destroy());
+        }
+        this.displayedJars = [];
+        this.displayedText = [];
+
+        // Which jars to display
+        let start = page * this.jarsPerPage;
+        let end = start + this.jarsPerPage;
+        let jarsToShow = this.jars.slice(start, end);
+
+        // Layout jars vertically in the rectangle
+        let x = 90; // center inside 180px panel
+        let yStart = 60;
+        let spacing = 120;//50;
+
+        jarsToShow.forEach((jarData, i) => {
+            let jar = this.add.image(x, yStart + i * spacing, jarData.key);
+            jar.setScale(4);
+            let jarLabel = this.add.text(jar.x,   jar.y + jar.displayHeight / 2 + 10, jarData.key.slice(0, -4), {color: '#fff', fontSize:'15px'}).setOrigin(0.5,0);
+
+            this.displayedJars.push(jar);
+            this.displayedText.push(jarLabel);
+        });
     }
 }
 
@@ -268,8 +375,8 @@ const config = {
     height: 512,
     pixelArt: true, // keeps pixelart from getting blurry
     backgroundColor: 0xE0B0FF,
-    //scene: [StartScene, Scene1, SceneMid, Scene3]
-    scene: Scene2
+    scene: [StartScene, Scene1, SceneMid, Scene2]
+    //scene: Scene2
 };
 
 const game = new Phaser.Game(config);
