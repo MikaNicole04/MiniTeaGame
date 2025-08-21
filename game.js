@@ -171,6 +171,9 @@ class Scene2 extends Phaser.Scene {
         // background table
         this.load.image('table', 'sprites/tableTexture.png');
 
+        // bowl
+        this.load.image('bowl', 'sprites/bowl.png');
+
         // jar sprites
         this.load.image('blackLeaf_jar', 'sprites/flower_jar/blackLeaf_jar.png');
         this.load.image('butterflyPea_jar', 'sprites/flower_jar/butterflyPea_jar.png');
@@ -210,17 +213,26 @@ class Scene2 extends Phaser.Scene {
     }
 
     create(){
-        //this.add.text(10,150, 'SCENE 2: TEA', {fill: 'fff', fontSize:'30px'}).setOrigin(0,0);
         this.add.image(0,0,"table").setOrigin(0,0);
+        this.add.text(200,20, 'CLICK then DRAG \n tea to the bowl', {fill: 'fff', fontSize:'30px', fontStyle: 'bold'}).setOrigin(0,0);
         this.add.rectangle(0,0, 180, 512, "0x00000", 0.7).setOrigin(0,0);
 
+        this.bowl = this.add.image(225,200,'bowl').setOrigin(0,0).setInteractive(); // basket
+        this.bowl.setScale(0.25); 
 
-         // All jars (up to 16) - replace with your own logic
+        // make basket a drop zone
+        this.bowl.input.dropZone = true;
+
+
+        // All jars (up to 16) - replace with your own logic
         this.jars = [];
         const currFlowers = Array.from(gameState.flowerSet)
-        for (let i = 0; i < currFlowers.length; i++) {   // make 16 the size of the set eventuallly
-            let str = currFlowers[i] + "_jar"; 
-            this.jars.push({ key: str });
+        for (let i = 0; i < currFlowers.length; i++) {  // CHANGE BACK TO currFlowers.length
+            let jarStr = currFlowers[i] + "_jar"; 
+            let teaStr = currFlowers[i] + "_crushed"; 
+            // let jarStr = flowerList[i] + "_jar"; 
+            // let teaStr = flowerList[i] + "_crushed"; 
+            this.jars.push({ key: jarStr, teaKey: teaStr});
         }
 
         this.currentPage = 0;   // start at page 0
@@ -228,6 +240,22 @@ class Scene2 extends Phaser.Scene {
 
         // Draw first page
         this.showPage(this.currentPage);
+
+        // --- Global drag handling (for tea proxies) ---
+        this.input.on('drag', (pointer, gameObject, dragX, dragY) => {
+            //if (this.draggedTea && gameObject === this.draggedTea) {
+                gameObject.x = dragX;
+                gameObject.y = dragY;
+            //}
+        });
+
+        this.input.on('drop', (pointer, gameObject, bowl) => {
+           // if (this.draggedTea && gameObject === this.draggedTea) {
+                if(bowl === this.bowl) {
+                    button.setVisible(true);
+                }
+            //}
+        });
 
         // Arrow buttons
         this.nextBtn = this.add.text(100, 480, "↓", { fontSize: "32px", fill: "#fff" })
@@ -247,6 +275,23 @@ class Scene2 extends Phaser.Scene {
                     this.showPage(this.currentPage);
                 }
             });
+        
+
+        const button = this.add.text(430,450,'->', {
+            fontSize: '32px',
+            fill: '#fff',
+            backgroundColor: '#000',
+            padding: {x:10, y:5}
+        });
+        button.setInteractive({useHandCursor:true}); // gives the button the ability to give code to it :)
+        button.setVisible(false);
+        button.on('pointerdown', () => {  // when pointer is clicked
+            //console.log('Button clicked!');
+            this.scene.stop('Scene2');
+            this.scene.start('Scene3');
+        })
+        button.on('pointerover', () => button.setStyle({ fill: '#ff0' })); // when pointer hovers over button
+        button.on('pointerout', () => button.setStyle({ fill: '#fff' })); // when pointer is not over button
     }
 
     showPage(page) {
@@ -266,15 +311,32 @@ class Scene2 extends Phaser.Scene {
         // Layout jars vertically in the rectangle
         let x = 90; // center inside 180px panel
         let yStart = 60;
-        let spacing = 120;//50;
+        let spacing = 120; // space between jars
 
         jarsToShow.forEach((jarData, i) => {
-            let jar = this.add.image(x, yStart + i * spacing, jarData.key);
+            let jar = this.add.image(x, yStart + i * spacing, jarData.key);  // show jar
             jar.setScale(4);
+
+            // jar label
             let jarLabel = this.add.text(jar.x,   jar.y + jar.displayHeight / 2 + 10, jarData.key.slice(0, -4), {color: '#fff', fontSize:'15px'}).setOrigin(0.5,0);
 
+            // so they can be cleared when new page is loaded
             this.displayedJars.push(jar);
             this.displayedText.push(jarLabel);
+
+            // 🔹 Make jar interactive for spawning tea
+            jar.setInteractive({ useHandCursor: true });
+            jar.on('pointerdown', (pointer) => {
+                this.draggedTea = this.add.image(pointer.x, pointer.y, jarData.teaKey)
+                    .setScale(3)
+                    .setAlpha(0.8)
+                    .setInteractive({ draggable: true });
+
+                // this.input.setDraggable(this.draggedTea);
+                // this.input.emit('dragstart', pointer, this.draggedTea);
+               
+            });
+
         });
     }
 }
@@ -375,7 +437,7 @@ const config = {
     height: 512,
     pixelArt: true, // keeps pixelart from getting blurry
     backgroundColor: 0xE0B0FF,
-    scene: [StartScene, Scene1, SceneMid, Scene2]
+    scene: [StartScene, Scene1, SceneMid, Scene2, Scene3]
     //scene: Scene2
 };
 
